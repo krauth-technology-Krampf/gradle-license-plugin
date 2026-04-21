@@ -12,6 +12,7 @@ import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.codehaus.plexus.util.ReaderFactory
 import org.gradle.api.DefaultTask
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.ResolvedArtifact
@@ -161,7 +162,9 @@ internal open class LicenseReportTask : DefaultTask() {
         try {
           configuration.isCanBeResolved = true
         } catch (e: Exception) {
-          logger.warn("Cannot resolve configuration ${configuration.name}: ${e.shortMessage()}")
+          if (e !is InvalidUserDataException || !e.shortMessage().endsWith("after it has been included in dependency resolution.")) {
+            logger.warn("Cannot resolve configuration ${configuration.name}: ${e.shortMessage()}")
+          }
           logger.debug("Cannot resolve configuration ${configuration.name}", e)
         }
       }
